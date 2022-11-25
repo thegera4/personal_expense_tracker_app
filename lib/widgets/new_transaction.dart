@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:expense_tracker/widgets/adaptive_button.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -56,48 +58,57 @@ class _NewTransactionState extends State<NewTransaction> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            TextField(
-              decoration: const InputDecoration(labelText: 'Title'),
-              controller: _titleController,
-              //onChanged: ((value) => titleInput = value),
-              onSubmitted: (_) => _submitData(),
-            ),
-            TextField(
-              decoration: const InputDecoration(labelText: 'Amount'),
-              controller: _amountController,
-              //onChanged: ((value) => amountInput = value),
-              keyboardType: TextInputType.number,
-              onSubmitted: (_) => _submitData(),
-            ),
-            Container(
-              height: 70,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(_selectedDate == null ?
-                  'No Date Chosen!' : 
-                  'Picked Date: ${DateFormat.yMMMd().format(_selectedDate)}'),
-                  TextButton(
-                    onPressed: _presentDatePicker,
-                    child: const Text(
-                      'Change Date',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
+    return SingleChildScrollView(
+      child: Card(
+        child: Container(
+          padding: EdgeInsets.only(
+            top: 10,
+            left: 10,
+            right: 10,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 10,
+          ), // EdgeInsets.bottom is the height of the keyboard
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              /*CupertinoTextField(
+                controller: _titleController,
+                onSubmitted: (_) => _submitData(),
+                placeholder: 'Title',
+              ),*/
+              TextField(
+                decoration: const InputDecoration(labelText: 'Title'),
+                controller: _titleController,
+                //onChanged: ((value) => titleInput = value),
+                onSubmitted: (_) => _submitData(),
               ),
-            ),
-            ElevatedButton(
-              onPressed: _submitData,
-              child: const Text('Add Transaction'),
-            ),
-          ],
+              TextField(
+                decoration: const InputDecoration(labelText: 'Amount'),
+                controller: _amountController,
+                //onChanged: ((value) => amountInput = value),
+                keyboardType: TextInputType.number,
+                onSubmitted: (_) => _submitData(),
+              ),
+              SizedBox(
+                height: 70,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(_selectedDate == null ?
+                    'No Date Chosen!' : 
+                    'Picked Date: ${DateFormat.yMMMd().format(_selectedDate)}'),
+                    AdaptiveButton(
+                        text: 'Choose Date',
+                        handler: _presentDatePicker
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: _submitData,
+                child: const Text('Add Transaction'),
+              ),
+            ],
+          ),
         ),
       ),
     );
