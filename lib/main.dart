@@ -88,20 +88,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  final List<Transaction> _userTransactions = [
-    /*Transaction(
-      id: 't1',
-      title: 'New Shoes',
-      amount: 69.99,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Weekly Groceries',
-      amount: 16.53,
-      date: DateTime.now(),
-    ),*/
-  ];
+  final List<Transaction> _userTransactions = [];
 
   bool _showChart = false;
 
@@ -142,6 +129,76 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  List<Widget> _buildLandscapeContent(
+      MediaQueryData mediaQuery,
+      AppBar appBar,
+      Widget transactionListWidget,
+      ){
+    return [Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('Show Chart'),
+        Switch.adaptive( //adaptive adjust the look of the switch based on the platform
+          activeColor: Theme.of(context).colorScheme.secondary,
+          value: _showChart,
+          onChanged: (value) {
+            setState(() {
+              _showChart = value;
+            });
+          },
+        ),
+      ],
+    ), _showChart ? SizedBox(
+      height: (MediaQuery.of(context).size.height -
+          MediaQuery.of(context).padding.top -
+          kToolbarHeight) *
+          0.7,
+      child: Chart(recentTransactions: _recentTransactions),
+    ) : transactionListWidget];
+  }
+
+  List<Widget> _buildPortraitContent(
+      MediaQueryData mediaQuery,
+      AppBar appBar,
+      Widget transactionListWidget,
+      ) {
+    return [SizedBox(
+      height: (mediaQuery.size.height -
+          appBar.preferredSize.height -
+          mediaQuery.padding.top) *
+          0.3,
+      child: Chart(recentTransactions: _recentTransactions),
+    ),
+    transactionListWidget];
+  }
+
+  Widget _buildCupertinoNavigationBar() {
+    return CupertinoNavigationBar(
+      middle: const Text('Personal Expense Tracker'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          GestureDetector(
+            child: const Icon(CupertinoIcons.add),
+            onTap: () => _startAddNewTransaction(context),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return AppBar(
+      title: const Text('Personal Expense Tracker'),
+      actions: <Widget>[
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => _startAddNewTransaction(context),
+        )
+      ],
+    );
+  }
+
 @override
   Widget build(BuildContext context) {
 
@@ -150,27 +207,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
 
     final dynamic appBar = Platform.isIOS ?
-      CupertinoNavigationBar(
-        middle: const Text('Personal Expense Tracker'),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            GestureDetector(
-            child: const Icon(CupertinoIcons.add),
-            onTap: () => _startAddNewTransaction(context),
-            )
-          ],
-        ),
-      ) :
-      AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _startAddNewTransaction(context),
-          ),
-        ],
-      );
+      _buildCupertinoNavigationBar() :
+      _buildAppBar();
 
     final transactionListWidget = SizedBox(
         height: (MediaQuery.of(context).size.height -
@@ -184,36 +222,18 @@ class _MyHomePageState extends State<MyHomePage> {
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            if(isLandscape) Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Show Chart'),
-                Switch.adaptive( //adaptive adjust the look of the switch based on the platform
-                  activeColor: Theme.of(context).colorScheme.secondary,
-                  value: _showChart,
-                  onChanged: (value) {
-                    setState(() {
-                      _showChart = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-            if(!isLandscape) SizedBox(
-              height: (mediaQuery.size.height -
-                  appBar.preferredSize.height -
-                  mediaQuery.padding.top) *
-                  0.3,
-              child: Chart(recentTransactions: _recentTransactions),
-            ),
-            if(!isLandscape) transactionListWidget,
-            if(isLandscape) _showChart ? SizedBox(
-                height: (mediaQuery.size.height -
-                    appBar.preferredSize.height -
-                    mediaQuery.padding.top) *
-                    0.7,
-                child: Chart(recentTransactions: _recentTransactions)
-            ) : transactionListWidget,
+            if(isLandscape)
+              ..._buildLandscapeContent( //spread operator used to add all the elements of the list to the parent list
+                mediaQuery,
+                appBar,
+                transactionListWidget,
+              ),
+            if(!isLandscape)
+              ..._buildPortraitContent(
+                  mediaQuery,
+                  appBar,
+                  transactionListWidget
+              ),
           ],
         ),
       ),
@@ -236,4 +256,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
       );
   }
+
+
 }
